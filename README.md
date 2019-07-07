@@ -1,10 +1,18 @@
-# Unlimit
+# Unlimit 🚀
 
-Unlimit is a simple tool to quickly run your app on your device without worrying about the 100 device limit per developer account set by Apple. It achieves this by switching your Xcode Project to the Personal Team.
+Unlimit is a simple tool to quickly run your app on your device without worrying about the 100 device limit per developer account set by Apple. It achieves this by **temporarily switching your Xcode Project to the `Personal Team`**.
 
 ### Why can't I just do it myself?
 
-Well, you can, if your project is simple. However, if your project has capabilities like Push Notifications, Background Modes, App extensions, and more, things get complicated, since these require you to configure the Personal Team with all these entitlements. Unlimit get's rid of all this mess, and let's your focus on running the app on your device.
+Well, you can, if your project is simple. However, if your project has capabilities like **Push Notifications**, **Background Modes** & **App Extensions**, things get complicated, since these require you to configure your `Personal Team` with all these entitlements. Unlimit gets rid of all this mess, and gets you quickly up and running on your device.
+
+### What's the catch?
+
+Well, since unlimit temporarily removes capabilities like **App Extensions**,** Push Notifications** & more from your project, you **can't** test these features on your device when using your personal team.
+
+### How do I undo unlimit's changes?
+
+We recommend you run unlimit when you have no staged changes, so that you can simple go back by running `git reset --hard` when you're done testing on your device.
 
 ## Installation
 
