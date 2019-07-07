@@ -12,7 +12,7 @@ Well, you can, if your project is simple. However, if your project has capabilit
 
 ### What's the catch?
 
-Well, since unlimit temporarily removes capabilities like **App Extensions**,** Push Notifications** & more from your project, you **can't** test these features on your device when using your personal team.
+Well, since unlimit temporarily removes capabilities like **App Extensions, Push Notifications** & more from your project, you **can't** test these features on your device when using your personal team.
 
 ### How do I undo unlimit's changes?
 
