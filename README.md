@@ -1,4 +1,4 @@
-# Unlimit 🚀
+# Unlimit 🚀📲
 
 Unlimit is a simple tool to quickly run your app on your device without worrying about the 100 device limit per developer account set by Apple. It achieves this by **temporarily switching your Xcode Project to the `Personal Team`**.
 
