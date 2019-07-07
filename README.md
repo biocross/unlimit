@@ -2,6 +2,10 @@
 
 Unlimit is a simple tool to quickly run your app on your device without worrying about the 100 device limit per developer account set by Apple. It achieves this by **temporarily switching your Xcode Project to the `Personal Team`**.
 
+> In a nutsell, unlimit fixes this:
+
+<img width="350" src="https://github.com/biocross/unlimit/raw/master/images/max_devices.png" alt="Xcode Device Limit Reached Error">
+
 ### Why can't I just do it myself?
 
 Well, you can, if your project is simple. However, if your project has capabilities like **Push Notifications**, **Background Modes** & **App Extensions**, things get complicated, since these require you to configure your `Personal Team` with all these entitlements. Unlimit gets rid of all this mess, and gets you quickly up and running on your device.
