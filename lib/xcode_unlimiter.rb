@@ -4,15 +4,48 @@ require 'securerandom'
 require 'json'
 require 'plist'
 
+ProjectPathKey = 'project_path'.freeze
+PlistPathKey = 'plist_path'.freeze
+
 module Unlimit
   class CLI
-    def start
+    def start(options)
       puts 'Switching your project to Personal Team!'.yellow
 
+      xcode_project_files = Dir.glob('*.xcodeproj')
       project_path = ''
       plist_path = ''
       target_name = ''
       extension_name = ''
+
+      # Check for a valid xcode_project
+      unless xcode_project_files.count == 1 || options.key?(ProjectPathKey)
+        abort('Please specify the .xcodeproj project file to use with the --project option like --project MyProject.xcodeproj'.red)
+      else 
+        if options.key?(ProjectPathKey)
+          project_path = options[ProjectPathKey]
+        else
+          project_path = xcode_project_files.first
+        end
+
+        unless File.directory?(project_path)
+          abort("Project not found at #{project_path}".red)
+        end
+
+        puts "Using #{project_path}".green
+      end
+
+      unless options.key?(PlistPathKey)
+        abort('Please specify the path to your main target\'s Info.plist file with the --plist option like --plist MyProject-Info.plist'.red)
+      else 
+        plist_path = options[PlistPathKey]
+
+        unless File.file?(plist_path)
+          abort("Plist file not found at #{plist_path}".red)
+        end
+
+        puts "Using Info.plist at #{plist_path}".green
+      end
 
       project = Xcodeproj::Project.open(project_path)
 

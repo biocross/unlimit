@@ -1,6 +1,13 @@
 #!/usr/bin/env ruby
 
 require 'unlimit'
+require 'optparse'
+
+options = {}
+OptionParser.new do |opt|
+  opt.on('--project XCODEPROJ') { |o| options['project_path'] = o }
+  opt.on('--plist INFO_PLIST') { |o| options['plist_path'] = o }
+end.parse!
 
 unlimiter = Unlimit::CLI.new
-unlimiter.start
+unlimiter.start(options)
