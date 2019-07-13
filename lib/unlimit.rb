@@ -7,7 +7,6 @@ require 'plist'
 ProjectPathKey = 'project_path'.freeze
 PlistPathKey = 'plist_path'.freeze
 TargetNameKey = 'target_name'.freeze
-ProductTypeKey = 'productType'.freeze
 ProductTypeApplicationTarget = 'com.apple.product-type.application'.freeze
 
 module Unlimit
@@ -19,7 +18,7 @@ module Unlimit
       project_path = ''
       plist_path = ''
       target_name = ''
-      extension_name = ''
+      extensions = []
 
       # Check for a valid xcode_project
       unless xcode_project_files.count == 1 || options.key?(ProjectPathKey)
@@ -59,15 +58,20 @@ module Unlimit
         puts "Using target #{target_name}"
       else 
         for target in project.targets 
-          target_info = Hash(target)
-          if target_info[ProductTypeKey] == ProductTypeApplicationTarget
-            target_name = target_info["name"]
+          if target.product_type == ProductTypeApplicationTarget
+            target_name = target.name
             puts "Using target #{target_name}. If this is incorrect, please specify the target name with the --target option".green
             break;
           end
         end
       end
 
+      for target in project.targets 
+        if target.product_type.include? 'app-extension'
+          extensions.push(target.name)
+        end
+      end
+  
       # Turn off capabilities that require entitlements
       puts 'Turning OFF all Capabilities'.red
       for value in project.root_object.attributes do
@@ -107,8 +111,8 @@ module Unlimit
       system("bundle exec fastlane run update_app_identifier plist_path:#{plist_path} app_identifier:#{bundle_identifier}")
 
       # Remove App Extensions
-      puts 'Removing App Extensions...'.red
-      system("bundle exec configure_extensions remove #{project_path} #{target_name} #{extension_name}")
+      puts "Removing App Extensions: #{extensions.join(', ')}".red
+      system("bundle exec configure_extensions remove #{project_path} #{target_name} #{extensions.join(' ')}")
 
       puts 'You\'re good to go! Just connect your device, switch to your \'Personal Team\', and hit run!'.green
     end
