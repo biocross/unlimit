@@ -110,6 +110,9 @@ module Unlimit
       bundle_identifier = "com.unlimit.#{SecureRandom.uuid}"
       system("bundle exec fastlane run update_app_identifier plist_path:#{plist_path} app_identifier:#{bundle_identifier}")
 
+      puts 'Enabling Automatic Code Signing...'.red
+      system("bundle exec fastlane run automatic_code_signing use_automatic_signing:true targets:#{target_name}")
+
       # Remove App Extensions
       puts "Removing App Extensions: #{extensions.join(', ')}".red
       system("bundle exec configure_extensions remove #{project_path} #{target_name} #{extensions.join(' ')}")
