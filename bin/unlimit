@@ -7,6 +7,7 @@ options = {}
 OptionParser.new do |opt|
   opt.on('--project XCODEPROJ') { |o| options['project_path'] = o }
   opt.on('--plist INFO_PLIST') { |o| options['plist_path'] = o }
+  opt.on('--target TARGET_NAME') { |o| options['target_name'] = o }
 end.parse!
 
 unlimiter = Unlimit::CLI.new

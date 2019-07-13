@@ -6,6 +6,9 @@ require 'plist'
 
 ProjectPathKey = 'project_path'.freeze
 PlistPathKey = 'plist_path'.freeze
+TargetNameKey = 'target_name'.freeze
+ProductTypeKey = 'productType'.freeze
+ProductTypeApplicationTarget = 'com.apple.product-type.application'.freeze
 
 module Unlimit
   class CLI
@@ -48,6 +51,22 @@ module Unlimit
       end
 
       project = Xcodeproj::Project.open(project_path)
+
+      if options.key?(TargetNameKey)
+        target_name = options[TargetNameKey]
+        target = project.targets.find { |t| t.name == target_name }
+        abort "Couldn't find the target '#{target_name}'  in '#{project_path}'" if target.nil?
+        puts "Using target #{target_name}"
+      else 
+        for target in project.targets 
+          target_info = Hash(target)
+          if target_info[ProductTypeKey] == ProductTypeApplicationTarget
+            target_name = target_info["name"]
+            puts "Using target #{target_name}. If this is incorrect, please specify the target name with the --target option".green
+            break;
+          end
+        end
+      end
 
       # Turn off capabilities that require entitlements
       puts 'Turning OFF all Capabilities'.red
