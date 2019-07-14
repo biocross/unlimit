@@ -1,14 +1,16 @@
+# frozen_string_literal: true
+
 require 'unlimit/version'
 require 'xcodeproj'
 require 'securerandom'
 require 'json'
 require 'plist'
 
-ProjectPathKey = 'project_path'.freeze
-PlistPathKey = 'plist_path'.freeze
-TargetNameKey = 'target_name'.freeze
-InfoPlistBuildSettingKey = 'INFOPLIST_FILE'.freeze
-ProductTypeApplicationTarget = 'com.apple.product-type.application'.freeze
+ProjectPathKey = 'project_path'
+PlistPathKey = 'plist_path'
+TargetNameKey = 'target_name'
+InfoPlistBuildSettingKey = 'INFOPLIST_FILE'
+ProductTypeApplicationTarget = 'com.apple.product-type.application'
 
 module Unlimit
   class CLI
@@ -23,20 +25,20 @@ module Unlimit
       target = nil
 
       # Check for a valid xcode_project
-      unless xcode_project_files.count == 1 || options.key?(ProjectPathKey)
-        abort('Please specify the .xcodeproj project file to use with the --project option like --project MyProject.xcodeproj'.red)
-      else 
-        if options.key?(ProjectPathKey)
-          project_path = options[ProjectPathKey]
-        else
-          project_path = xcode_project_files.first
-        end
+      if xcode_project_files.count == 1 || options.key?(ProjectPathKey)
+        project_path = if options.key?(ProjectPathKey)
+                         options[ProjectPathKey]
+                       else
+                         xcode_project_files.first
+                       end
 
         unless File.directory?(project_path)
           abort("Project not found at #{project_path}".red)
         end
 
         puts "Using #{project_path}".green
+      else
+        abort('Please specify the .xcodeproj project file to use with the --project option like --project MyProject.xcodeproj'.red)
       end
 
       project = Xcodeproj::Project.open(project_path)
@@ -46,13 +48,13 @@ module Unlimit
         target = project.targets.find { |t| t.name == target_name }
         abort "Couldn't find the target '#{target_name}'  in '#{project_path}'" if target.nil?
         puts "Using target #{target_name}"
-      else 
-        for target in project.targets 
-          if target.product_type == ProductTypeApplicationTarget
-            target_name = target.name
-            puts "Using target #{target_name}. If this is incorrect, please specify the target name with the --target option".green
-            break;
-          end
+      else
+        project.targets.each do |current_target|
+          next unless current_target.product_type == ProductTypeApplicationTarget
+          target = current_target
+          target_name = current_target.name
+          puts "Using target #{target_name}. If this is incorrect, please specify the target name with the --target option".green
+          break
         end
       end
 
@@ -68,43 +70,43 @@ module Unlimit
           plist_path = build_settings[InfoPlistBuildSettingKey]
         end
 
-        if (plist_path.nil? || plist_path.empty?)
+        if plist_path.nil? || plist_path.empty?
           abort('Please specify the path to your main target\'s Info.plist file with the --plist option like --plist MyProject-Info.plist'.red)
         end
       end
-        puts puts "Using Info.plist at path #{plist_path}.".green
+      puts puts "Using Info.plist at path #{plist_path}.".green
 
-      for target in project.targets 
+      project.targets.each do |target|
         if target.product_type.include? 'app-extension'
           extensions.push(target.name)
         end
       end
-  
+
       # Turn off capabilities that require entitlements
       puts 'Turning OFF all Capabilities'.red
-      for value in project.root_object.attributes do
-        if value[0] == 'TargetAttributes'
-          hash = value[1]
-          for key, val in hash do
-            if val.key?('SystemCapabilities') 
-              capabilities = val['SystemCapabilities']
-              for key, val in capabilities
-                if val.key?('enabled')
-                  puts ' Turning OFF ' + key
-                  capabilities[key]['enabled'] = '0'
-                end
-              end
+      project.root_object.attributes.each do |value|
+        next unless value[0] == 'TargetAttributes'
+
+        hash = value[1]
+        hash.each do |_key, val|
+          next unless val.key?('SystemCapabilities')
+
+          capabilities = val['SystemCapabilities']
+          capabilities.each do |key, val|
+            if val.key?('enabled')
+              puts ' Turning OFF ' + key
+              capabilities[key]['enabled'] = '0'
             end
           end
         end
       end
-      project.save()
+      project.save
 
       # Remove Entitlements
       puts 'Clearing entitlements...'.red
       Dir.glob('**/*.entitlements').each do |source_file|
         empty_plist = {}.to_plist
-        File.open(source_file, 'w') { |file| file.puts empty_plist  }
+        File.open(source_file, 'w') { |file| file.puts empty_plist }
       end
 
       # Remove Capability Keys from Plist
