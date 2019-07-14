@@ -11,11 +11,19 @@ PlistPathKey = 'plist_path'
 TargetNameKey = 'target_name'
 InfoPlistBuildSettingKey = 'INFOPLIST_FILE'
 ProductTypeApplicationTarget = 'com.apple.product-type.application'
+Divider = '================================================'
 
 module Unlimit
   class CLI
+    def putsWithOverrides(parameter, value, flag)
+      puts "Using #{parameter}: #{value}".green + " (Use flag --#{flag} to override)".yellow
+    end
+
     def start(options)
-      puts 'Switching your project to Personal Team!'.yellow
+      puts Divider
+      puts '                  unlimit 🚀📲                  '
+      puts '    Switching your project to Personal Team!    '.yellow
+      puts Divider
 
       xcode_project_files = Dir.glob('*.xcodeproj')
       project_path = ''
@@ -35,8 +43,7 @@ module Unlimit
         unless File.directory?(project_path)
           abort("Project not found at #{project_path}".red)
         end
-
-        puts "Using #{project_path}".green
+        putsWithOverrides('project', project_path, ProjectPathKey)
       else
         abort('Please specify the .xcodeproj project file to use with the --project option like --project MyProject.xcodeproj'.red)
       end
@@ -53,7 +60,7 @@ module Unlimit
           next unless current_target.product_type == ProductTypeApplicationTarget
           target = current_target
           target_name = current_target.name
-          puts "Using target #{target_name}. If this is incorrect, please specify the target name with the --target option".green
+          putsWithOverrides('target', target_name, TargetNameKey)
           break
         end
       end
@@ -64,23 +71,26 @@ module Unlimit
         unless File.file?(plist_path)
           abort("Info.plist file not found at path: #{plist_path}".red)
         end
+        puts "Using Info.plist at path #{plist_path}.".green
       else
         if target.build_configurations.count > 0
           build_settings = target.build_configurations.first.build_settings
           plist_path = build_settings[InfoPlistBuildSettingKey]
+          putsWithOverrides('Info.plist', plist_path, PlistPathKey)
         end
 
         if plist_path.nil? || plist_path.empty?
           abort('Please specify the path to your main target\'s Info.plist file with the --plist option like --plist MyProject-Info.plist'.red)
         end
       end
-      puts puts "Using Info.plist at path #{plist_path}.".green
 
       project.targets.each do |target|
         if target.product_type.include? 'app-extension'
           extensions.push(target.name)
         end
       end
+
+      puts "================================================\n"
 
       # Turn off capabilities that require entitlements
       puts 'Turning OFF all Capabilities'.red
@@ -127,7 +137,9 @@ module Unlimit
       puts "Removing App Extensions: #{extensions.join(', ')}".red
       system("bundle exec configure_extensions remove #{project_path} #{target_name} #{extensions.join(' ')}")
 
+      puts "\n#{Divider}"
       puts 'You\'re good to go! Just connect your device, switch to your \'Personal Team\', and hit run!'.green
+      puts Divider
     end
   end
 end
