@@ -7,6 +7,7 @@ require 'plist'
 ProjectPathKey = 'project_path'.freeze
 PlistPathKey = 'plist_path'.freeze
 TargetNameKey = 'target_name'.freeze
+InfoPlistBuildSettingKey = 'INFOPLIST_FILE'.freeze
 ProductTypeApplicationTarget = 'com.apple.product-type.application'.freeze
 
 module Unlimit
@@ -19,6 +20,7 @@ module Unlimit
       plist_path = ''
       target_name = ''
       extensions = []
+      target = nil
 
       # Check for a valid xcode_project
       unless xcode_project_files.count == 1 || options.key?(ProjectPathKey)
@@ -37,18 +39,6 @@ module Unlimit
         puts "Using #{project_path}".green
       end
 
-      unless options.key?(PlistPathKey)
-        abort('Please specify the path to your main target\'s Info.plist file with the --plist option like --plist MyProject-Info.plist'.red)
-      else 
-        plist_path = options[PlistPathKey]
-
-        unless File.file?(plist_path)
-          abort("Plist file not found at #{plist_path}".red)
-        end
-
-        puts "Using Info.plist at #{plist_path}".green
-      end
-
       project = Xcodeproj::Project.open(project_path)
 
       if options.key?(TargetNameKey)
@@ -65,6 +55,24 @@ module Unlimit
           end
         end
       end
+
+      if options.key?(PlistPathKey)
+        plist_path = options[PlistPathKey]
+
+        unless File.file?(plist_path)
+          abort("Info.plist file not found at path: #{plist_path}".red)
+        end
+      else
+        if target.build_configurations.count > 0
+          build_settings = target.build_configurations.first.build_settings
+          plist_path = build_settings[InfoPlistBuildSettingKey]
+        end
+
+        if (plist_path.nil? || plist_path.empty?)
+          abort('Please specify the path to your main target\'s Info.plist file with the --plist option like --plist MyProject-Info.plist'.red)
+        end
+      end
+        puts puts "Using Info.plist at path #{plist_path}.".green
 
       for target in project.targets 
         if target.product_type.include? 'app-extension'
