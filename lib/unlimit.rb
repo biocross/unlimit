@@ -19,9 +19,17 @@ module Unlimit
       puts "Using #{parameter}: #{value}".green + " (Use flag --#{flag} to override)".yellow
     end
 
+    def showVersion
+      puts Divider
+      puts "You're using unlimit version #{Unlimit::VERSION}".green
+      puts 'https://github.com/biocross/unlimit'.yellow
+      puts Divider
+      abort
+    end
+
     def start(options)
       puts Divider
-      puts '                  unlimit 🚀📲                  '
+      puts "            unlimit 🚀📲 (#{Unlimit::VERSION})       "
       puts '    Switching your project to Personal Team!    '.yellow
       puts Divider
 

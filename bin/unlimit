@@ -1,14 +1,17 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require 'unlimit'
 require 'optparse'
 
+unlimiter = Unlimit::CLI.new
 options = {}
+
 OptionParser.new do |opt|
   opt.on('--project XCODEPROJ') { |o| options['project_path'] = o }
   opt.on('--plist INFO_PLIST') { |o| options['plist_path'] = o }
   opt.on('--target TARGET_NAME') { |o| options['target_name'] = o }
+  opt.on('--version') { unlimiter.showVersion }
 end.parse!
 
-unlimiter = Unlimit::CLI.new
 unlimiter.start(options)
