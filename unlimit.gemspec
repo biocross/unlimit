@@ -10,15 +10,13 @@ Gem::Specification.new do |spec|
   spec.email         = ["sids.1992@gmail.com"]
 
   spec.summary       = "Test your iOS projects on device despite the 100 device limit"
-  spec.description   = "Test your iOS projects on device despite the 100 device limit, by switching to your personal team"
+  spec.description   = "Test your iOS projects on device despite the 100 device limit, by automatically switching to your personal team"
   spec.homepage      = "https://github.com/biocross/unlimit"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.
   if spec.respond_to?(:metadata)
-    spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
-
     spec.metadata["homepage_uri"] = spec.homepage
     spec.metadata["source_code_uri"] = "https://github.com/biocross/unlimit"
     spec.metadata["changelog_uri"] = "https://github.com/biocross/unlimit"
