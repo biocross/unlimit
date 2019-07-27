@@ -5,12 +5,15 @@ require 'xcodeproj'
 require 'securerandom'
 require 'json'
 require 'plist'
+require 'open3'
 
 ProjectPathKey = 'project_path'
 PlistPathKey = 'plist_path'
 TargetNameKey = 'target_name'
+TeamIDKey = 'team_id'
 InfoPlistBuildSettingKey = 'INFOPLIST_FILE'
 ProductTypeApplicationTarget = 'com.apple.product-type.application'
+FastlaneEnvironmentVariables = "LC_ALL=en_US.UTF-8 FASTLANE_SKIP_UPDATE_CHECK=true"
 Divider = '================================================'
 
 module Unlimit
@@ -37,6 +40,7 @@ module Unlimit
       project_path = ''
       plist_path = ''
       target_name = ''
+      personal_team_id = ''
       extensions = []
       target = nil
 
@@ -66,6 +70,7 @@ module Unlimit
       else
         project.targets.each do |current_target|
           next unless current_target.product_type == ProductTypeApplicationTarget
+
           target = current_target
           target_name = current_target.name
           putsWithOverrides('target', target_name, TargetNameKey)
@@ -96,6 +101,20 @@ module Unlimit
         if target.product_type.include? 'app-extension'
           extensions.push(target.name)
         end
+      end
+
+      valid_codesigning_identities, stderr, status = Open3.capture3("security find-identity -p codesigning -v")
+      personal_teams = valid_codesigning_identities.scan(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i)
+      if personal_teams.size == 1
+        personal_team_name = personal_teams[0].strip
+        personal_team_id, stderr, status = Open3.capture3("security find-certificate -c #{personal_team_name} -p | openssl x509 -text | grep -o OU=[^,]* | grep -v Apple | sed s/OU=//g")
+        personal_team_id = personal_team_id.strip
+        putsWithOverrides("Team ID (from: #{personal_team_name})", personal_team_id, TeamIDKey)
+      else 
+        puts "\nYou have quite a few developer identities on your machine. unlimit is unable to decide which one to use 😅".red
+        puts "If you know the Team ID to use, pass it with the --teamid flag like --teamid 6A2T6455Y3".yellow
+        puts "To get help on how to find your Team ID: check out https://github.com/biocross/unlimit/blob/master/guide/Personal_Team.md".yellow
+        abort
       end
 
       puts "================================================\n"
@@ -136,17 +155,20 @@ module Unlimit
       # Change Bundle Identifier
       puts 'Changing bundle identifier...'.red
       bundle_identifier = "com.unlimit.#{SecureRandom.uuid}"
-      system("bundle exec fastlane run update_app_identifier plist_path:#{plist_path} app_identifier:#{bundle_identifier}")
+      system("#{FastlaneEnvironmentVariables} bundle exec fastlane run update_app_identifier plist_path:#{plist_path} app_identifier:#{bundle_identifier}")
 
       puts 'Enabling Automatic Code Signing...'.red
-      system("bundle exec fastlane run automatic_code_signing use_automatic_signing:true targets:#{target_name}")
+      system("#{FastlaneEnvironmentVariables} bundle exec fastlane run automatic_code_signing use_automatic_signing:true targets:#{target_name}")
+
+      puts 'Switching to Personal Team...'.red
+      system("#{FastlaneEnvironmentVariables} bundle exec fastlane run update_project_team teamid:\"#{personal_team_id}\"")
 
       # Remove App Extensions
       puts "Removing App Extensions: #{extensions.join(', ')}".red
       system("bundle exec configure_extensions remove #{project_path} #{target_name} #{extensions.join(' ')}")
 
       puts "\n#{Divider}"
-      puts 'You\'re good to go! Just connect your device, switch to your \'Personal Team\', and hit run!'.green
+      puts 'You\'re good to go! Just connect your device and hit run!'.green
       puts Divider
     end
   end
