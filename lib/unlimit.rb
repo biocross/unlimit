@@ -13,7 +13,7 @@ TargetNameKey = 'target_name'
 TeamIDKey = 'team_id'
 InfoPlistBuildSettingKey = 'INFOPLIST_FILE'
 ProductTypeApplicationTarget = 'com.apple.product-type.application'
-FastlaneEnvironmentVariables = "LC_ALL=en_US.UTF-8 FASTLANE_SKIP_UPDATE_CHECK=true"
+FastlaneEnvironmentVariables = 'LC_ALL=en_US.UTF-8 FASTLANE_SKIP_UPDATE_CHECK=true'
 Divider = '================================================'
 
 module Unlimit
@@ -103,17 +103,17 @@ module Unlimit
         end
       end
 
-      valid_codesigning_identities, stderr, status = Open3.capture3("security find-identity -p codesigning -v")
+      valid_codesigning_identities, stderr, status = Open3.capture3('security find-identity -p codesigning -v')
       personal_teams = valid_codesigning_identities.scan(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i)
       if personal_teams.size == 1
         personal_team_name = personal_teams[0].strip
         personal_team_id, stderr, status = Open3.capture3("security find-certificate -c #{personal_team_name} -p | openssl x509 -text | grep -o OU=[^,]* | grep -v Apple | sed s/OU=//g")
         personal_team_id = personal_team_id.strip
         putsWithOverrides("Team ID (from: #{personal_team_name})", personal_team_id, TeamIDKey)
-      else 
+      else
         puts "\nYou have quite a few developer identities on your machine. unlimit is unable to decide which one to use 😅".red
-        puts "If you know the Team ID to use, pass it with the --teamid flag like --teamid 6A2T6455Y3".yellow
-        puts "To get help on how to find your Team ID: check out https://github.com/biocross/unlimit/blob/master/guide/Personal_Team.md".yellow
+        puts 'If you know the Team ID to use, pass it with the --teamid flag like --teamid 6A2T6455Y3'.yellow
+        puts 'To get help on how to find your Team ID: check out https://github.com/biocross/unlimit/blob/master/guide/Personal_Team.md'.yellow
         abort
       end
 
@@ -164,8 +164,11 @@ module Unlimit
       system("#{FastlaneEnvironmentVariables} bundle exec fastlane run update_project_team teamid:\"#{personal_team_id}\"")
 
       # Remove App Extensions
-      puts "Removing App Extensions: #{extensions.join(', ')}".red
-      system("bundle exec configure_extensions remove #{project_path} #{target_name} #{extensions.join(' ')}")
+      unless extensions.empty?
+        app_extensions = extensions.join(', ')
+        puts "Removing App Extensions: #{app_extensions}".red
+        system("bundle exec configure_extensions remove #{project_path} #{target_name} #{app_extensions}")
+      end
 
       puts "\n#{Divider}"
       puts 'You\'re good to go! Just connect your device and hit run!'.green
