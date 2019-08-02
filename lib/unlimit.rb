@@ -103,18 +103,23 @@ module Unlimit
         end
       end
 
-      valid_codesigning_identities, stderr, status = Open3.capture3('security find-identity -p codesigning -v')
-      personal_teams = valid_codesigning_identities.scan(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i)
-      if personal_teams.size == 1
-        personal_team_name = personal_teams[0].strip
-        personal_team_id, stderr, status = Open3.capture3("security find-certificate -c #{personal_team_name} -p | openssl x509 -text | grep -o OU=[^,]* | grep -v Apple | sed s/OU=//g")
-        personal_team_id = personal_team_id.strip
-        putsWithOverrides("Team ID (from: #{personal_team_name})", personal_team_id, TeamIDKey)
+      if options.key?(TeamIDKey)
+        personal_team_id = options[TeamIDKey]
+        putsWithOverrides("Team ID", personal_team_id, TeamIDKey)
       else
-        puts "\nYou have quite a few developer identities on your machine. unlimit is unable to decide which one to use 😅".red
-        puts 'If you know the Team ID to use, pass it with the --teamid flag like --teamid 6A2T6455Y3'.yellow
-        puts 'To get help on how to find your Team ID: check out https://github.com/biocross/unlimit/blob/master/guide/Personal_Team.md'.yellow
-        abort
+        valid_codesigning_identities, stderr, status = Open3.capture3('security find-identity -p codesigning -v')
+        personal_teams = valid_codesigning_identities.scan(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i)
+        if personal_teams.size == 1
+          personal_team_name = personal_teams[0].strip
+          personal_team_id, stderr, status = Open3.capture3("security find-certificate -c #{personal_team_name} -p | openssl x509 -text | grep -o OU=[^,]* | grep -v Apple | sed s/OU=//g")
+          personal_team_id = personal_team_id.strip
+          putsWithOverrides("Team ID (from: #{personal_team_name})", personal_team_id, TeamIDKey)
+        else
+          puts "\nYou have quite a few developer identities on your machine. unlimit is unable to decide which one to use 😅".red
+          puts 'If you know the Team ID to use, pass it with the --teamid flag like --teamid 6A2T6455Y3'.yellow
+          puts 'To get help on how to find your Team ID: check out https://github.com/biocross/unlimit/blob/master/guide/Personal_Team.md'.yellow
+          abort
+        end
       end
 
       puts "================================================\n"
@@ -161,7 +166,7 @@ module Unlimit
       system("#{FastlaneEnvironmentVariables} bundle exec fastlane run automatic_code_signing use_automatic_signing:true targets:#{target_name}")
 
       puts 'Switching to Personal Team...'.red
-      system("#{FastlaneEnvironmentVariables} bundle exec fastlane run update_project_team teamid:\"#{personal_team_id}\"")
+      system("#{FastlaneEnvironmentVariables} bundle exec fastlane run update_project_team teamid:\"#{personal_team_id}\" targets:#{target_name}")
 
       # Remove App Extensions
       unless extensions.empty?
