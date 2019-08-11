@@ -12,6 +12,7 @@ ProjectPathKey = 'project_path'
 PlistPathKey = 'plist_path'
 TargetNameKey = 'target_name'
 TeamIDKey = 'team_id'
+KeepFabricKey = 'keep_fabric'
 InfoPlistBuildSettingKey = 'INFOPLIST_FILE'
 ProductTypeApplicationTarget = 'com.apple.product-type.application'
 FastlaneEnvironmentVariables = 'LC_ALL=en_US.UTF-8 FASTLANE_SKIP_UPDATE_CHECK=true'
@@ -79,10 +80,12 @@ module Unlimit
           putsWithOverrides('target', target_name, TargetNameKey)
 
           # Remove Fabric Script build phase to stop the annoying "new app" email
-          current_target.build_phases.each do |build_phase|
-            next unless build_phase.is_a?(Xcodeproj::Project::Object::PBXShellScriptBuildPhase) && build_phase.shell_script.include?('/Fabric/run')
+          unless options.key?(KeepFabricKey)
+            current_target.build_phases.each do |build_phase|
+              next unless build_phase.is_a?(Xcodeproj::Project::Object::PBXShellScriptBuildPhase) && build_phase.shell_script.include?('/Fabric/run')
 
-            build_phase.shell_script = '#' + build_phase.shell_script
+              build_phase.shell_script = '#' + build_phase.shell_script
+            end
           end
           break
         end

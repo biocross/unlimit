@@ -12,6 +12,7 @@ OptionParser.new do |opt|
   opt.on('--plist INFO_PLIST') { |o| options['plist_path'] = o }
   opt.on('--target TARGET_NAME') { |o| options['target_name'] = o }
   opt.on('--team_id TEAM_ID') { |o| options['team_id'] = o }
+  opt.on('--keep_fabric') { |_o| options['keep_fabric'] = true }
   opt.on('--version') { unlimiter.showVersion }
 end.parse!
 
