@@ -6,6 +6,7 @@ require 'securerandom'
 require 'json'
 require 'plist'
 require 'open3'
+require 'highline'
 
 ProjectPathKey = 'project_path'
 PlistPathKey = 'plist_path'
@@ -43,6 +44,8 @@ module Unlimit
       personal_team_id = ''
       extensions = []
       target = nil
+
+      cli = HighLine.new
 
       # Check for a valid xcode_project
       if xcode_project_files.count == 1 || options.key?(ProjectPathKey)
@@ -105,20 +108,36 @@ module Unlimit
 
       if options.key?(TeamIDKey)
         personal_team_id = options[TeamIDKey]
-        putsWithOverrides("Team ID", personal_team_id, TeamIDKey)
+        putsWithOverrides('Team ID', personal_team_id, TeamIDKey)
       else
         valid_codesigning_identities, stderr, status = Open3.capture3('security find-identity -p codesigning -v')
         personal_teams = valid_codesigning_identities.scan(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i)
         if personal_teams.size == 1
-          personal_team_name = personal_teams[0].strip
+          personal_team_name = personal_teams.first.strip
           personal_team_id, stderr, status = Open3.capture3("security find-certificate -c #{personal_team_name} -p | openssl x509 -text | grep -o OU=[^,]* | grep -v Apple | sed s/OU=//g")
           personal_team_id = personal_team_id.strip
           putsWithOverrides("Team ID (from: #{personal_team_name})", personal_team_id, TeamIDKey)
         else
-          puts "\nYou have quite a few developer identities on your machine. unlimit is unable to decide which one to use 😅".red
+          puts "\nYou have quite a few developer identities on your machine. unlimit is unable to decide which one to use 😅".yellow
           puts 'If you know the Team ID to use, pass it with the --teamid flag like --teamid 6A2T6455Y3'.yellow
-          puts 'To get help on how to find your Team ID: check out https://github.com/biocross/unlimit/blob/master/guide/Personal_Team.md'.yellow
-          abort
+          puts "\nFor now, choose one from the list below: (The one most likely to work will have your email)".yellow
+          puts 'Which codesigning identity should unlimit use?'.green
+          selected_team = ''
+          codesigning_options = valid_codesigning_identities.split("\n")
+          codesigning_options = codesigning_options.select { |line| line.include?(')') }
+          codesigning_options = codesigning_options.map { |identity| identity.scan(/\d+\) (.+)/).first.first }
+          cli.choose do |menu|
+            menu.prompt = 'Select one by entering the number: '
+            codesigning_options.each do |identity|
+              menu.choice(identity) { cli.say(identity); selected_team = identity }
+            end
+          end
+
+          personal_team = selected_team.scan(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i)
+          personal_team_name = personal_team.first.strip
+          personal_team_id, stderr, status = Open3.capture3("security find-certificate -c #{personal_team_name} -p | openssl x509 -text | grep -o OU=[^,]* | grep -v Apple | sed s/OU=//g")
+          personal_team_id = personal_team_id.strip
+          putsWithOverrides("Team ID (from: #{personal_team_name})", personal_team_id, TeamIDKey)
         end
       end
 
