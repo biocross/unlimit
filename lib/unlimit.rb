@@ -77,6 +77,13 @@ module Unlimit
           target = current_target
           target_name = current_target.name
           putsWithOverrides('target', target_name, TargetNameKey)
+
+          # Remove Fabric Script build phase to stop the annoying "new app" email
+          current_target.build_phases.each do |build_phase|
+            next unless build_phase.is_a?(Xcodeproj::Project::Object::PBXShellScriptBuildPhase) && build_phase.shell_script.include?('/Fabric/run')
+
+            build_phase.shell_script = '#' + build_phase.shell_script
+          end
           break
         end
       end
@@ -154,11 +161,11 @@ module Unlimit
 
           capabilities = val['SystemCapabilities']
           capabilities.each do |key, val|
-            if val.key?('enabled')
-              unless key.include?('SafariKeychain')
-                puts ' Turning OFF ' + key
-                capabilities[key]['enabled'] = '0' 
-              end
+            next unless val.key?('enabled')
+
+            unless key.include?('SafariKeychain')
+              puts ' Turning OFF ' + key
+              capabilities[key]['enabled'] = '0'
             end
           end
         end
