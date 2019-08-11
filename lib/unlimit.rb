@@ -155,8 +155,10 @@ module Unlimit
           capabilities = val['SystemCapabilities']
           capabilities.each do |key, val|
             if val.key?('enabled')
-              puts ' Turning OFF ' + key
-              capabilities[key]['enabled'] = '0'
+              unless key.include?('SafariKeychain')
+                puts ' Turning OFF ' + key
+                capabilities[key]['enabled'] = '0' 
+              end
             end
           end
         end
