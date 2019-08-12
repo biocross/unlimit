@@ -15,7 +15,9 @@ TeamIDKey = 'team_id'
 KeepFabricKey = 'keep_fabric'
 InfoPlistBuildSettingKey = 'INFOPLIST_FILE'
 ProductTypeApplicationTarget = 'com.apple.product-type.application'
-FastlaneEnvironmentVariables = 'LC_ALL=en_US.UTF-8 FASTLANE_SKIP_UPDATE_CHECK=true'
+FastlaneEnvironmentVariables = 'LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 FASTLANE_SKIP_UPDATE_CHECK=true'
+CapabilitiesWhitelist = ['com.apple.SafariKeychain'].freeze
+FastFilePath = 'fastlane/Fastfile'
 Divider = '================================================'
 
 module Unlimit
@@ -43,6 +45,8 @@ module Unlimit
       plist_path = ''
       target_name = ''
       personal_team_id = ''
+      uses_app_groups = false
+      entitlements_file = ''
       extensions = []
       target = nil
 
@@ -166,7 +170,11 @@ module Unlimit
           capabilities.each do |key, val|
             next unless val.key?('enabled')
 
-            unless key.include?('SafariKeychain')
+            if key.include?('com.apple.ApplicationGroups.iOS')
+              uses_app_groups = true
+            end
+
+            unless CapabilitiesWhitelist.include?(key)
               puts ' Turning OFF ' + key
               capabilities[key]['enabled'] = '0'
             end
@@ -178,8 +186,9 @@ module Unlimit
       # Remove Entitlements
       puts 'Clearing entitlements...'.red
       Dir.glob('**/*.entitlements').each do |source_file|
-        empty_plist = {}.to_plist
-        File.open(source_file, 'w') { |file| file.puts empty_plist }
+        entitlements_plist = uses_app_groups ? { "com.apple.security.application-groups": '' }.to_plist : {}.to_plist
+        entitlements_file = source_file if uses_app_groups
+        File.open(source_file, 'w') { |file| file.puts entitlements_plist }
       end
 
       # Remove Capability Keys from Plist
@@ -192,6 +201,24 @@ module Unlimit
       puts 'Changing bundle identifier...'.red
       bundle_identifier = "com.unlimit.#{SecureRandom.uuid}"
       system("#{FastlaneEnvironmentVariables} bundle exec fastlane run update_app_identifier plist_path:#{plist_path} app_identifier:#{bundle_identifier}")
+
+      if uses_app_groups # Create a temporary fastfile, and set the app group identifiers
+        fastfile = "lane :set_app_group do
+        update_app_group_identifiers(entitlements_file: \"#{entitlements_file}\", app_group_identifiers: ['group.#{bundle_identifier}'])
+        end"
+
+        existingFastfile = ''
+        if File.file?(FastFilePath)
+          File.open('./fastlane/Fastfile', 'r') do |file|
+            existingFastfile = file.read
+          end
+        end
+        File.open(FastFilePath, 'w') do |file|
+          file.write(fastfile)
+        end
+        system("#{FastlaneEnvironmentVariables} bundle exec fastlane set_app_group")
+        existingFastfile.empty? ? File.delete(FastFilePath) : File.open('./fastlane/Fastfile', 'w') { |file| file.write(existingFastfile) }
+      end
 
       puts 'Enabling Automatic Code Signing...'.red
       system("#{FastlaneEnvironmentVariables} bundle exec fastlane run automatic_code_signing use_automatic_signing:true targets:#{target_name}")
