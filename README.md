@@ -22,7 +22,9 @@ We recommend you run unlimit when you have no staged changes, so that you can si
 
 ## Installation
 
-Add this line to your app's Gemfile:
+If your iOS/Mac project does not have a `Gemfile` yet, [learn how to set it up here](https://www.mokacoding.com/blog/ruby-for-ios-developers-bundler/). It's highly recommended you use [**bundler**](https://bundler.io/) to maintain consistent versions of tools like `cocoapods`, `fastlane` etc within your team. 
+
+To use unlimit, add this line to your app's Gemfile:
 
 ```ruby
 gem 'unlimit'
@@ -32,7 +34,6 @@ And then install it using [bundler](https://bundler.io/) by executing:
 
     $ bundle install
 
-If your iOS project does not have a `Gemfile` yet, [learn how to set it up here](https://www.mokacoding.com/blog/ruby-for-ios-developers-bundler/).
 
 ## Usage
 
@@ -43,12 +44,16 @@ After installing the gem, just run:
 and unlimit will do it's magic.
 
 ## Parameters
+All these parameters are optional, as unlimit can **autodetect** most of these. You can use these when unlimit is unable to figure them out, or to pass in overrides.
 
 | Parameter | Description | Example |
 | --- | --- | --- |
 | `project` | The **.xcodeproj** project file to use | `--project MyApp.xcodeproj` |
 | `target`  | The **app target** you want to run on your device | `--target MyApp` |
 | `plist`   | The **path** to your app's **Info.plist** file | `--plist MyApp/MyApp-Info.plist` |
+| `team_id`   | The Code Signing **Team ID** to use | `--team_id A1B2C3D4E5A` |
+| `keep_fabric`   | Unlimit automatically disables Fabric's build phase script, to avoid the annoying `New app ID added` email sent by Fabric. Use this flag for keep the Fabric script. (Note: This does not affect Fabric/Crashlytics functionality, only disables it's dSYM uploading shell script) | `--keep_fabric` |
+| `version`   | Print the current unlimit version you're using and exit | `--version |
 
 ## Contributing
 
