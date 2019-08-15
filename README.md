@@ -1,6 +1,6 @@
 # Unlimit 🚀📲
 
-Unlimit is a simple tool to quickly run your app on your device without worrying about the 100 device limit per developer account set by Apple. It achieves this by temporarily switching your Xcode Project to your personal developer account (`Personal Team`).
+Unlimit is a simple tool to quickly run your app on your device without worrying about the 100 device limit per developer account set by Apple. It achieves this by temporarily switching your Xcode Project to your [free](https://github.com/biocross/unlimit#do-i-require-a-paid-apple-developer-account-to-use-this) personal team (`Personal Team`).
 
 > In a nutsell, unlimit fixes this:
 
@@ -53,7 +53,7 @@ All these parameters are optional, as unlimit can **autodetect** most of these. 
 | `plist`   | The **path** to your app's **Info.plist** file | `--plist MyApp/MyApp-Info.plist` |
 | `team_id`   | The Code Signing **Team ID** to use | `--team_id A1B2C3D4E5A` |
 | `keep_fabric`   | Unlimit automatically disables Fabric's build phase script, to avoid the annoying `New app ID added` email sent by Fabric. Use this flag for keep the Fabric script. (Note: This does not affect Fabric/Crashlytics functionality, only disables it's dSYM uploading shell script) | `--keep_fabric` |
-| `version`   | Print the current unlimit version you're using and exit | `--version |
+| `version`   | Print the current unlimit version you're using and exit | `--version` |
 
 ## Contributing
 
@@ -63,7 +63,13 @@ Bug reports and pull requests are welcome. Any feedback or feature suggesions ar
 
 ### Do I require a paid apple developer account to use this?
 
-No, you can get a `personal team` using a free Apple Developer Account, since Apple now allows testing on device with a free developer accounts as well.
+No, you can get a `personal team` using a free Apple Developer Account, since Apple now allows testing on device with a free developer accounts as well. As apple puts it: 
+
+> Xcode 7 and Xcode 8 allow you to select the free personal team provided with your Apple ID for signing your app. This team allows you to build apps for your personal use on devices owned by you, but it does not allow you to code sign apps destined for the App Store or for enterprise use.
+
+>You can identify this account by looking in the accounts tab of the Xcode preferences. It is also displayed in the team menu displayed in a target's general build settings. Your personal account will be the account with the string '(Personal Team)' beside the name.
+
+Source: https://developer.apple.com/library/archive/qa/qa1915/_index.html
 
 ## License
 
