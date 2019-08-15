@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Siddharth Gupta']
   spec.email         = ['sids.1992@gmail.com']
 
-  spec.summary       = 'Test your iOS projects on device despite the 100 device limit'
+  spec.summary       = 'Test your iOS projects on device despite the 100 device limit, by automatically switching to your personal team'
   spec.description   = 'Test your iOS projects on device despite the 100 device limit, by automatically switching to your personal team'
   spec.homepage      = 'https://github.com/biocross/unlimit'
   spec.license       = 'MIT'
@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   if spec.respond_to?(:metadata)
     spec.metadata['homepage_uri'] = spec.homepage
     spec.metadata['source_code_uri'] = 'https://github.com/biocross/unlimit'
-    spec.metadata['changelog_uri'] = 'https://github.com/biocross/unlimit'
+    spec.metadata['changelog_uri'] = 'https://github.com/biocross/unlimit/blob/master/CHANGELOG.md'
   else
     raise 'RubyGems 2.0 or newer is required to protect against ' \
       'public gem pushes.'

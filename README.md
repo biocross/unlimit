@@ -1,4 +1,4 @@
-# Unlimit 🚀📲
+# Unlimit 🚀📲 [![Gem Version](https://badge.fury.io/rb/unlimit.svg)](https://badge.fury.io/rb/unlimit)
 
 Unlimit is a simple tool to quickly run your app on your device without worrying about the 100 device limit per developer account set by Apple. It achieves this by temporarily switching your Xcode Project to your [free](https://github.com/biocross/unlimit#do-i-require-a-paid-apple-developer-account-to-use-this) personal team (`Personal Team`).
 
