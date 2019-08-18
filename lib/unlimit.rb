@@ -4,6 +4,7 @@ require 'unlimit/version'
 require 'xcodeproj'
 require 'securerandom'
 require 'json'
+require 'yaml'
 require 'plist'
 require 'open3'
 require 'highline'
@@ -46,6 +47,7 @@ module Unlimit
       target_name = ''
       personal_team_id = ''
       uses_app_groups = false
+      app_group_name = ''
       entitlements_file = ''
       extensions = []
       target = nil
@@ -155,7 +157,7 @@ module Unlimit
         end
       end
 
-      puts "================================================\n"
+      puts "#{Divider}\n"
 
       # Turn off capabilities that require entitlements
       puts 'Turning OFF all Capabilities'.red
@@ -203,8 +205,9 @@ module Unlimit
       system("#{FastlaneEnvironmentVariables} bundle exec fastlane run update_app_identifier plist_path:#{plist_path} app_identifier:#{bundle_identifier}")
 
       if uses_app_groups # Create a temporary fastfile, and set the app group identifiers
+        app_group_name = "group.#{bundle_identifier}"
         fastfile = "lane :set_app_group do
-        update_app_group_identifiers(entitlements_file: \"#{entitlements_file}\", app_group_identifiers: ['group.#{bundle_identifier}'])
+        update_app_group_identifiers(entitlements_file: \"#{entitlements_file}\", app_group_identifiers: ['#{app_group_name}'])
         end"
 
         existingFastfile = ''
@@ -231,6 +234,25 @@ module Unlimit
         app_extensions = extensions.join(', ')
         puts "Removing App Extensions: #{app_extensions}".red
         system("bundle exec configure_extensions remove #{project_path} #{target_name} #{app_extensions}")
+      end
+
+      if File.file?('.unlimit.yml')
+        puts 'Running Custom Scripts from .unlimit.yml'.yellow
+        local_configuration = YAML.load_file('.unlimit.yml')
+        unless local_configuration['custom_scripts'].empty?
+          environment_variables = { 'UNLIMIT_PROJECT_PATH' => project_path, 'UNLIMIT_TARGET_NAME' => target_name, 'UNLIMIT_PLIST_PATH' => plist_path, 'UNLIMIT_TEAM_ID' => personal_team_id, 'UNLIMIT_APP_GROUP_NAME' => app_group_name }
+          local_configuration['custom_scripts'].each do |script|
+            script = script.to_s
+            environment_variables.each do |key, variable|
+              script.gsub!(key.to_s, variable.to_s)
+            end
+            puts "Running: #{script}".green
+            output, stderr, status = Open3.capture3(script)
+            puts output
+            puts stderr
+            puts "Done with Status: #{status}"
+          end
+        end
       end
 
       puts "\n#{Divider}"
