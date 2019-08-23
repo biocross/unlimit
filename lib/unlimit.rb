@@ -240,7 +240,7 @@ module Unlimit
         puts 'Running Custom Scripts from .unlimit.yml'.yellow
         local_configuration = YAML.load_file('.unlimit.yml')
         unless local_configuration['custom_scripts'].empty?
-          environment_variables = { 'UNLIMIT_PROJECT_PATH' => project_path, 'UNLIMIT_TARGET_NAME' => target_name, 'UNLIMIT_PLIST_PATH' => plist_path, 'UNLIMIT_TEAM_ID' => personal_team_id, 'UNLIMIT_APP_GROUP_NAME' => app_group_name }
+          environment_variables = { 'UNLIMIT_PROJECT_PATH' => project_path, 'UNLIMIT_TARGET_NAME' => target_name, 'UNLIMIT_PLIST_PATH' => plist_path, 'UNLIMIT_TEAM_ID' => personal_team_id, 'UNLIMIT_APP_BUNDLE_ID' => bundle_identifier, 'UNLIMIT_APP_GROUP_NAME' => app_group_name }
           local_configuration['custom_scripts'].each do |script|
             script = script.to_s
             environment_variables.each do |key, variable|
