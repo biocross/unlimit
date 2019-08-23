@@ -73,7 +73,7 @@ custom_scripts:
 Like the above script, You can use a few handy variables that unlimit will automatically replace with real values in your scripts:
 
 | Variable | Description |
-| --- | --- | --- |
+| --- | --- |
 | `UNLIMIT_PROJECT_PATH` | The path to the current **.xcodeproj** |
 | `UNLIMIT_TARGET_NAME`  | The current target name |
 | `UNLIMIT_PLIST_PATH`   | The **path** to your target's **Info.plist** file |
