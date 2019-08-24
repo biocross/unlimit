@@ -1,4 +1,10 @@
 # Change Log
+## [0.0.4](https://github.com/biocross/unlimit/releases/tag/0.0.4)
+Released on 2019-08-24.
+
+#### Fixed
+- Unlimit adds a new binary `unlimit-xcode` to avoid a naming conflict with the system binary `unlimit`. Use this new command to run unlimit without bundler! 
+
 ## [0.0.3](https://github.com/biocross/unlimit/releases/tag/0.0.3)
 Released on 2019-08-24.
 
