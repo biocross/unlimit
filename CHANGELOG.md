@@ -1,9 +1,10 @@
 # Change Log
 ## [0.0.3](https://github.com/biocross/unlimit/releases/tag/0.0.3)
-Released on 2019-08-23.
+Released on 2019-08-24.
 
 #### Added
 - Unlimit now supports custom scripts after finishing! Just create an `.unlimit.yml` file in your project root, put your scripts in the `custom_scripts` key, and run unlimit.
+- Added `--configuration` flag to set configuration file path manually (Default: `.unlimit.yml`)
 
 ## [0.0.2](https://github.com/biocross/unlimit/releases/tag/0.0.2)
 Released on 2019-08-15.

@@ -8,18 +8,6 @@ Unlimit is a simple tool to quickly run your app on your device without worrying
 
 **Note that all changes unlimit makes to your project are local on your mac, and do not in anyway affect the configuration on your Apple Developer Portal.**
 
-### Why can't I just do it myself?
-
-Well, you can, if your project is simple. However, if your project has capabilities like **Push Notifications**, **Background Modes** & **App Extensions**, things get complicated, since these require you to configure your `Personal Team` with all these entitlements. Unlimit gets rid of all this mess, and gets you quickly up and running on your device.
-
-### What's the catch?
-
-Well, since unlimit temporarily removes capabilities like **App Extensions, Push Notifications** & more from your project, you **cannot** test these features on your device when using your personal team.
-
-### How do I undo unlimit's changes?
-
-We recommend you run unlimit when you have no staged changes, so that you can simple go back by running `git reset --hard` when you're done testing on your device.
-
 ## Installation
 
 If your iOS/Mac project does not have a `Gemfile` yet, [learn how to set it up here](https://www.mokacoding.com/blog/ruby-for-ios-developers-bundler/). It's highly recommended you use [**bundler**](https://bundler.io/) to maintain consistent versions of tools like `cocoapods`, `fastlane` etc within your team. 
@@ -54,6 +42,7 @@ All these parameters are optional, as unlimit can **autodetect** most of these. 
 | `target`  | The **app target** you want to run on your device | `--target MyApp` |
 | `plist`   | The **path** to your app's **Info.plist** file | `--plist MyApp/MyApp-Info.plist` |
 | `team_id`   | The Code Signing **Team ID** to use | `--team_id A1B2C3D4E5A` |
+| `configuration`   | The configuration file to use to read your custom scripts, defaults to `.unlimit.yml` (See below) | `--configuration config.yml` |
 | `keep_fabric`   | Unlimit automatically disables Fabric's build phase script, to avoid the annoying `New app ID added` email sent by Fabric. Use this flag for keep the Fabric script. (Note: This does not affect Fabric/Crashlytics functionality, only disables it's dSYM uploading shell script) | `--keep_fabric` |
 | `version`   | Print the current unlimit version you're using and exit | `--version` |
 
@@ -61,7 +50,7 @@ All these parameters are optional, as unlimit can **autodetect** most of these. 
 
 To perform additional actions after unlimit finishes, use custom scripts!
 
-Just define an `.unlimit.yml` file in your project root, and put in your scripts inside the `custom_scripts` key:
+Just create an `.unlimit.yml` file in your project root, and put in your scripts inside the `custom_scripts` array:
 
 For example, the following unlimit file runs a script to modify a plist using PlistBuddy:
 
@@ -85,7 +74,19 @@ Like the above script, You can use a few handy variables that unlimit will autom
 
 Bug reports and pull requests are welcome. Any feedback or feature suggesions are also encouraged.
 
-## More FAQs
+## FAQs
+
+### Why can't I just do it myself?
+
+Well, you can, if your project is simple. However, if your project has capabilities like **Push Notifications**, **Background Modes** & **App Extensions**, things get complicated, since these require you to configure your `Personal Team` with all these entitlements. Unlimit gets rid of all this mess, and gets you quickly up and running on your device.
+
+### What's the different between using unlimit and running on a registered device?
+
+Well, since unlimit temporarily removes capabilities like **App Extensions, Push Notifications** & more from your project, you **cannot** test these features on your device when using your personal team.
+
+### How do I undo unlimit's changes?
+
+We recommend you run unlimit when you have no staged changes, so that you can simple go back by running `git reset --hard` when you're done testing on your device.
 
 ### Do I require a paid apple developer account to use this?
 

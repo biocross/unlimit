@@ -14,11 +14,13 @@ PlistPathKey = 'plist_path'
 TargetNameKey = 'target_name'
 TeamIDKey = 'team_id'
 KeepFabricKey = 'keep_fabric'
+ProjectConfigurationFileKey = 'configuration'
 InfoPlistBuildSettingKey = 'INFOPLIST_FILE'
 ProductTypeApplicationTarget = 'com.apple.product-type.application'
 FastlaneEnvironmentVariables = 'LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8 FASTLANE_SKIP_UPDATE_CHECK=true'
 CapabilitiesWhitelist = ['com.apple.SafariKeychain'].freeze
 FastFilePath = 'fastlane/Fastfile'
+DefaultProjectConfigurationFilePath = '.unlimit.yml'
 Divider = '================================================'
 
 module Unlimit
@@ -49,6 +51,7 @@ module Unlimit
       uses_app_groups = false
       app_group_name = ''
       entitlements_file = ''
+      project_configuration_file = ''
       extensions = []
       target = nil
 
@@ -114,6 +117,18 @@ module Unlimit
         if plist_path.nil? || plist_path.empty?
           abort('Please specify the path to your main target\'s Info.plist file with the --plist option like --plist MyProject-Info.plist'.red)
         end
+      end
+
+      if options.key?(ProjectConfigurationFileKey)
+        project_configuration_file = options[ProjectConfigurationFileKey]
+
+        unless File.file?(project_configuration_file)
+          abort("YAML Configuration file not found at path: #{project_configuration_file}".red)
+        end
+        puts "Using YAML Configuration at path #{project_configuration_file}.".green
+      else
+        project_configuration_file = DefaultProjectConfigurationFilePath
+        putsWithOverrides('YAML Configuration', project_configuration_file, ProjectConfigurationFileKey)
       end
 
       project.targets.each do |target|
@@ -236,9 +251,9 @@ module Unlimit
         system("bundle exec configure_extensions remove #{project_path} #{target_name} #{app_extensions}")
       end
 
-      if File.file?('.unlimit.yml')
-        puts 'Running Custom Scripts from .unlimit.yml'.yellow
-        local_configuration = YAML.load_file('.unlimit.yml')
+      if File.file?(project_configuration_file)
+        puts "Running Custom Scripts from #{project_configuration_file}".red
+        local_configuration = YAML.load_file(project_configuration_file)
         unless local_configuration['custom_scripts'].empty?
           environment_variables = { 'UNLIMIT_PROJECT_PATH' => project_path, 'UNLIMIT_TARGET_NAME' => target_name, 'UNLIMIT_PLIST_PATH' => plist_path, 'UNLIMIT_TEAM_ID' => personal_team_id, 'UNLIMIT_APP_BUNDLE_ID' => bundle_identifier, 'UNLIMIT_APP_GROUP_NAME' => app_group_name }
           local_configuration['custom_scripts'].each do |script|
@@ -248,12 +263,12 @@ module Unlimit
             end
             puts "Running: #{script}".green
             output, stderr, status = Open3.capture3(script)
-            puts output
-            puts stderr
+            puts output unless output.empty?
+            puts stderr unless stderr.empty?
             puts "Done with Status: #{status}"
           end
-        end
-      end
+            end
+          end
 
       puts "\n#{Divider}"
       puts 'You\'re good to go! Just connect your device and hit run!'.green
