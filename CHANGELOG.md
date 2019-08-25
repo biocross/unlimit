@@ -1,4 +1,11 @@
 # Change Log
+
+## [0.0.5](https://github.com/biocross/unlimit/releases/tag/0.0.5)
+Released on 2019-08-25.
+
+#### Added
+- Unlimit now has Sentry integrated for error reporting in the gem.
+
 ## [0.0.4](https://github.com/biocross/unlimit/releases/tag/0.0.4)
 Released on 2019-08-24.
 

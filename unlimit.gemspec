@@ -37,6 +37,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'xcodeproj'
   spec.add_dependency 'plist'
   spec.add_dependency 'fastlane', '>= 2.116.0'
+  spec.add_dependency 'sentry-raven'
   spec.add_dependency 'configure_extensions'
   spec.add_dependency 'highline'
 
