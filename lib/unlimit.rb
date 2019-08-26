@@ -131,7 +131,7 @@ module Unlimit
         puts "Using YAML Configuration at path #{project_configuration_file}.".green
       else
         project_configuration_file = DefaultProjectConfigurationFilePath
-        putsWithOverrides('YAML Configuration', project_configuration_file, ProjectConfigurationFileKey)
+        putsWithOverrides('YAML Configuration', project_configuration_file, ProjectConfigurationFileKey) if File.file?(project_configuration_file)
       end
 
       project.targets.each do |target|
