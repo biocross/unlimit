@@ -3,9 +3,28 @@
 
 require 'unlimit'
 require 'optparse'
+require 'sentry-raven'
+
+def using_bundler
+  %w[BUNDLE_BIN_PATH BUNDLE_GEMFILE].each do |current|
+    return true if ENV.key?(current)
+  end
+  false
+end
 
 unlimiter = Unlimit::CLI.new
 options = {}
+
+Raven.configure do |config|
+  config.silence_ready = true
+  config.logger = Raven::Logger.new(nil)
+  config.dsn = 'Sentry_DSN'
+end
+
+Raven.tags_context(
+  bundler: using_bundler,
+  unlimit_version: Unlimit::VERSION
+)
 
 OptionParser.new do |opt|
   opt.on('--project XCODEPROJ') { |o| options['project_path'] = o }
@@ -17,4 +36,6 @@ OptionParser.new do |opt|
   opt.on('--version') { unlimiter.showVersion }
 end.parse!
 
-unlimiter.start(options)
+Raven.capture do
+  unlimiter.start(options, using_bundler, Raven)
+end
