@@ -1,5 +1,18 @@
 # Change Log
 
+## [0.0.7](https://github.com/biocross/unlimit/releases/tag/0.0.7)
+Released on 2019-08-26.
+
+#### Fixed
+- Fixed issues when running Unlimit without bundler
+- Fixed issues when detecting personal teams without email addresses
+
+## 0.0.6
+Released on 2019-08-26.
+
+#### Fixed
+- Fixes a crash when running Unlimit without bundler.
+
 ## [0.0.5](https://github.com/biocross/unlimit/releases/tag/0.0.5)
 Released on 2019-08-25.
 
