@@ -145,16 +145,15 @@ module Unlimit
         putsWithOverrides('Team ID', personal_team_id, TeamIDKey)
       else
         valid_codesigning_identities, stderr, status = Open3.capture3('security find-identity -p codesigning -v')
-        personal_teams = valid_codesigning_identities.scan(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i)
+        personal_teams = valid_codesigning_identities.scan(/\"(.+Developer.+)\"/i)
         if personal_teams.size == 1
           personal_team_name = personal_teams.first.strip
           personal_team_id, stderr, status = Open3.capture3("security find-certificate -c #{personal_team_name} -p | openssl x509 -text | grep -o OU=[^,]* | grep -v Apple | sed s/OU=//g")
           personal_team_id = personal_team_id.strip
-          putsWithOverrides("Team ID (from: #{personal_team_name})", personal_team_id, TeamIDKey)
         else
           puts "\nYou have quite a few developer identities on your machine. unlimit is unable to decide which one to use 😅".yellow
           puts 'If you know the Team ID to use, pass it with the --teamid flag like --teamid 6A2T6455Y3'.yellow
-          puts "\nFor now, choose one from the list below: (The one most likely to work will have your email)".yellow
+          puts "\nFor now, choose one from the list below: (Your personal team most likely contains your email or full name)".yellow
           puts 'Which codesigning identity should unlimit use?'.green
           selected_team = ''
           codesigning_options = valid_codesigning_identities.split("\n")
@@ -163,16 +162,16 @@ module Unlimit
           cli.choose do |menu|
             menu.prompt = 'Select one by entering the number: '
             codesigning_options.each do |identity|
-              menu.choice(identity) { cli.say(identity); selected_team = identity }
+              menu.choice(identity) { selected_team = identity }
             end
           end
 
-          personal_team = selected_team.scan(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i)
-          personal_team_name = personal_team.first.strip
-          personal_team_id, stderr, status = Open3.capture3("security find-certificate -c #{personal_team_name} -p | openssl x509 -text | grep -o OU=[^,]* | grep -v Apple | sed s/OU=//g")
+          personal_team = selected_team.scan(/:(.+)\(.+\)\"/i)
+          personal_team_name = personal_team.first.first.strip
+          personal_team_id, stderr, status = Open3.capture3("security find-certificate -c \"#{personal_team_name}\" -p | openssl x509 -text | grep -o OU=[^,]* | grep -v Apple | sed s/OU=//g")
           personal_team_id = personal_team_id.strip
-          putsWithOverrides("Team ID (from: #{personal_team_name})", personal_team_id, TeamIDKey)
         end
+        putsWithOverrides("Team ID (from: #{personal_team_name})", personal_team_id, TeamIDKey)
       end
 
       puts "#{Divider}\n"
