@@ -1,5 +1,14 @@
 # Change Log
 
+## [0.0.8](https://github.com/biocross/unlimit/releases/tag/0.0.8)
+
+Released on 2019-10-28.
+
+#### Fixed
+
+- Improved README
+- Integrate https://curl.press
+
 ## [0.0.7](https://github.com/biocross/unlimit/releases/tag/0.0.7)
 Released on 2019-08-26.
 

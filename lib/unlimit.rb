@@ -8,6 +8,7 @@ require 'yaml'
 require 'plist'
 require 'open3'
 require 'highline'
+require 'net/http'
 
 ProjectPathKey = 'project_path'
 PlistPathKey = 'plist_path'
@@ -58,6 +59,7 @@ module Unlimit
       fastlane_command = using_bundler ? 'bundle exec fastlane' : 'fastlane'
 
       cli = HighLine.new
+      sendEvent('unlimit.start')
       raven.capture_message('Begin', level: 'info')
 
       # Check for a valid xcode_project
@@ -271,11 +273,19 @@ module Unlimit
           end
         end
       end
-      
+      sendEvent('unlimit.finish')
       raven.capture_message('Finished', level: 'info')
       puts "\n#{Divider}"
       puts 'You\'re good to go! Just connect your device and hit run!'.green
       puts Divider
+    end
+
+    def sendEvent(event)
+      begin
+      uri = URI("https://curl.press/api/unlimit/add?event=#{event}")
+      Net::HTTP.get(uri)
+      rescue StandardError
+      end
     end
   end
 end
