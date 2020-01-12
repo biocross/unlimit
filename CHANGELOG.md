@@ -1,5 +1,20 @@
 # Change Log
 
+## [0.0.9](https://github.com/biocross/unlimit/releases/tag/0.0.9)
+
+Released on 2020-01-12. First 2020 Release! 🎉
+
+#### Added
+
+- Shows an error if no codesigning identities are found
+- Support for Apple Developer Accounts
+- Sample project to try unlimit
+
+#### Fixed 
+
+- Improved detection of Personal Team
+- Updated Dependencies
+
 ## [0.0.8](https://github.com/biocross/unlimit/releases/tag/0.0.8)
 
 Released on 2019-10-28.
