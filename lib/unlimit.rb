@@ -147,11 +147,21 @@ module Unlimit
         putsWithOverrides('Team ID', personal_team_id, TeamIDKey)
       else
         valid_codesigning_identities, stderr, status = Open3.capture3('security find-identity -p codesigning -v')
-        personal_teams = valid_codesigning_identities.scan(/\"(.+Developer.+)\"/i)
+        personal_teams = valid_codesigning_identities.scan(/\"(.+)\"/i)
         if personal_teams.size == 1
-          personal_team_name = personal_teams.first.strip
-          personal_team_id, stderr, status = Open3.capture3("security find-certificate -c #{personal_team_name} -p | openssl x509 -text | grep -o OU=[^,]* | grep -v Apple | sed s/OU=//g")
-          personal_team_id = personal_team_id.strip
+          personal_team_name = personal_teams.first
+          if personal_team_name.is_a?(Array)
+            personal_team_name = personal_team_name.first
+          end
+          personal_team_name = personal_team_name.strip
+          personal_team_id, stderr, status = Open3.capture3("security find-certificate -c \"#{personal_team_name}\" -p | openssl x509 -noout -subject")
+          personal_team_id = personal_team_id.split("/")
+          personal_team_id.each do |value|
+            if value.include?("OU=")
+              personal_team_id = value.gsub("OU=", "").strip
+              break
+            end
+          end
         elsif personal_teams.size == 0
           puts "No valid codesigning identities found on your Mac. Please open Xcode, login into your account (Preferences > Accounts) and download your identities.".red
           abort()
