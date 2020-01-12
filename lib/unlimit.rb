@@ -152,6 +152,9 @@ module Unlimit
           personal_team_name = personal_teams.first.strip
           personal_team_id, stderr, status = Open3.capture3("security find-certificate -c #{personal_team_name} -p | openssl x509 -text | grep -o OU=[^,]* | grep -v Apple | sed s/OU=//g")
           personal_team_id = personal_team_id.strip
+        elsif personal_teams.size == 0
+          puts "No valid codesigning identities found on your Mac. Please open Xcode, login into your account (Preferences > Accounts) and download your identities.".red
+          abort()
         else
           puts "\nYou have quite a few developer identities on your machine. unlimit is unable to decide which one to use 😅".yellow
           puts 'If you know the Team ID to use, pass it with the --teamid flag like --teamid 6A2T6455Y3'.yellow
