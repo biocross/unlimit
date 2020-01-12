@@ -41,6 +41,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'configure_extensions'
   spec.add_dependency 'highline'
 
+  spec.required_ruby_version = '>= 2.0.0'
   spec.add_development_dependency 'bundler', '>= 1.12.0'
   spec.add_development_dependency 'rake', '~> 10.0'
 end
