@@ -1,4 +1,5 @@
-# Unlimit 🚀📲 [![Gem Version](https://badge.fury.io/rb/unlimit.svg)](https://badge.fury.io/rb/unlimit)
+# Unlimit 🚀📲 [![Gem Version](https://badge.fury.io/rb/unlimit.svg)](https://badge.fury.io/rb/unlimit)![CI status](https://img.shields.io/github/workflow/status/biocross/unlimit/Ruby)
+
 
 Apple limits testing your app on a device to only 100 registered devices per developer account. If you work in a large team, this limit is often exhausted. 
 
